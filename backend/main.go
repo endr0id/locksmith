@@ -1,24 +1,20 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	connStr := "host=localhost port=5432 user=local_user password=password dbname=auth_db sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	e := echo.New()
 
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	e.GET("/health", func(c echo.Context) error {
+		return c.String(http.StatusOK, "locksmith is alive")
+	})
 
-	err = db.Ping()
-	if err != nil {
-		panic("DB接続失敗: " + err.Error())
-	}
-
-	fmt.Println("DB接続成功")
+	port := 8080
+	fmt.Printf("Starting server on port %d...\n", port)
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
