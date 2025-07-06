@@ -1,24 +1,21 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+
+	"github.com/endr0id/locksmith/handler"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	connStr := "host=localhost port=5432 user=local_user password=password dbname=auth_db sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	e := echo.New()
 
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	err = db.Ping()
-	if err != nil {
-		panic("DB接続失敗: " + err.Error())
-	}
+	handler.RegisterRoutes(e)
 
-	fmt.Println("DB接続成功")
+	port := 8080
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
